@@ -12,6 +12,10 @@ use function PHPUnit\Framework\isNull;
 
 class productsApiController extends Controller
 {
+    public function __construct()
+    {
+        sleep(0);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -35,7 +39,9 @@ class productsApiController extends Controller
         $request->validate([
             'name'=>'required',
             'price'=>'required|numeric',
-            'stock'=>'required|numeric'
+            'stock'=>'required|numeric',
+            'photos' =>'nullable',
+            'photos.*' => 'nullable|mimes:png,jpg,max:2000'
         ]);
 
         $products = Products::create([
@@ -51,7 +57,11 @@ class productsApiController extends Controller
                 $photos[$key] = new Photo(['name' => $newName]);
         };
         $products->photos()->saveMany($photos);
-        return response()->json(["message"=>"product is added",new ProductResource($products)]);
+        return response()->json([
+            "message"=>"product is added",
+            "product" => new ProductResource($products),
+            "success" => true
+        ]);
     }
 
     /**
@@ -78,10 +88,12 @@ class productsApiController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $request->validate([
             'name'=>'nullable|min:1',
             'price'=>'nullable|min:1|numeric',
-            'stock'=>'nullable|min:1|numeric'
+            'stock'=>'nullable|min:1|numeric',
+            ''
         ]);
 
         $product = Products::find($id);
@@ -98,7 +110,11 @@ class productsApiController extends Controller
            $product->stock = $request->stock;
        }
         $product->update();
-        return response()->json($product);
+        return response()->json([
+            'success' => true,
+            'product' => new ProductResource($product),
+            "message" => "product is updated"
+        ]);
     }
 
     /**
@@ -114,7 +130,7 @@ class productsApiController extends Controller
         if(is_null($product)){
             return response()->json(["message" => "Products is not found"],404);
         };
-        return response()->json(['message' => "you are here"]);
+        // return response()->json(['message' => "you are here"]);
         $product->delete();
         return response()->json(["message" => "Products is  deleted"]);
     }

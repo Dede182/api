@@ -22,13 +22,13 @@ class ApiAuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password)
         ]);
-        if(Auth::attempt($request->only(['email','password']))){
-            $tokens = Auth::user()->createToken('phone')->plainTextToken;
-            return response()->json(["token" => $tokens],200);
-        }
-        else{
-             return response()->json(['message' => "user not found",403]);
-        }
+        // if(Auth::attempt($request->only(['email','password']))){
+        //     $tokens = Auth::user()->createToken('phone')->plainTextToken;
+        //     return response()->json(["token" => $tokens],200);
+        // }
+
+             return response()->json(['message' => "Register successful",'success' =>true],200);
+
     }
 
 
@@ -37,14 +37,17 @@ class ApiAuthController extends Controller
             'email'=> "required|email",
             'password' => "required|min:6"
         ]);
+
         if(Auth::attempt($request->only(['email','password']))){
             $tokens = Auth::user()->createToken('phone')->plainTextToken;
             return response()->json([
+                'message' => "login successful",
                 'token' => $tokens,
-                'user' => new UserResource(Auth::user())
+                'auth' => new UserResource(Auth::user()),
+                "success"  => true,
             ]);
         }
-        return response()->json(['message' => "user not found",403]);
+        return response()->json(['message' => "user not found",'success' => false],403);
     }
 
 
